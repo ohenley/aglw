@@ -4,6 +4,10 @@ Library providing a simple Ada API for creating OpenGL windows on all major plat
 
 ::: Demos using Aglw can be found here : https://github.com/ohenley/aglw-demos
 
+## Prerequisite
+
+None
+
 ## Build
 
 - $ gprbuild aglw.gpr
