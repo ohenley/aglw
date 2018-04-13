@@ -25,7 +25,7 @@ Only works for win32
 
 ## Usage
 
-Lib to use in another end-user project. see https://github.com/ohenley/aglw-demos
+Lib to be used by end-user project. see https://github.com/ohenley/aglw-demos
 
 ## Status
 
