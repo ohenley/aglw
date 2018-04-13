@@ -9,7 +9,7 @@ Library providing a simple Ada API for creating OpenGL windows on all major plat
 ## Prerequisite
 
 - Win32 platform
-- Gnat compiler
+- GNAT compiler
 
 ## Dependencies
 
@@ -19,9 +19,21 @@ Library providing a simple Ada API for creating OpenGL windows on all major plat
 
 - $ gprbuild aglw.gpr
 
-## Work in progress
+## Limitations
 
-Linux support
+Only works for win32
+
+## Usage
+
+Lib to use in another end-user project. see https://github.com/ohenley/aglw-demos
+
+## Status
+
+Linux support: WIP
+
+## Acknowledgments
+ 
+None
 
 
 
