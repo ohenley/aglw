@@ -11,15 +11,13 @@ package body Aglw is
                    window_y : Natural := 0;
                    window_width : Natural := 200;
                    window_height : Natural := 200;
-                   window_title : String := "Title";
-                   window_class : String := "Core") is
+                   window_title : String := "Title") is
    begin
       window.x := window_x;
       window.y := window_y;
       window.height := window_height;
       window.width := window_width;
       window.title := Ada.Strings.Unbounded.To_Unbounded_String(window_title);
-      window.class := Ada.Strings.Unbounded.To_Unbounded_String(window_class);
    end init;
 
    protected flag is
@@ -42,7 +40,6 @@ package body Aglw is
          can_create_context := True;
       end go_create_context;
 
-
       procedure go_close is
       begin
          can_close := True;
@@ -64,8 +61,6 @@ package body Aglw is
 
    procedure start_window (window : in out Aglw.Window; start : access procedure; setup: access procedure; render : access procedure) is
 
-      terminated : Boolean := False;
-      context_created : Boolean := False;
       now : Ada.Real_Time.Time := Ada.Real_Time.Clock;
       old_now : Ada.Real_Time.Time := now;
       delta_time : Duration := 0.0;
@@ -92,7 +87,6 @@ package body Aglw is
       -- Client Start Render callback
       start.all;
       setup.all;
-
 
       while True
       loop

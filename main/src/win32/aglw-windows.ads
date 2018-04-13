@@ -1,6 +1,5 @@
 with Interfaces.C;
 with Win32;
-
 with System;
 
 package Aglw.Windows is
