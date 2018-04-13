@@ -1,0 +1,6 @@
+abstract project Aglw_Config is
+
+   type Platform_Type is ("win32", "linux", "macosx");
+   Platform : Platform_Type := external ("Platform", "win32");
+
+end Aglw_Config;
