@@ -10,6 +10,8 @@ library project Aglw is
         for Source_Dirs use ("main/src","main/src/win32");
       when "linux" =>
         for Source_Dirs use ("main/src","main/src/linux");
+      when "macosx" =>
+        for Source_Dirs use ("main/src","main/src/macosx");
    end case;
 
    for Object_Dir   use "build/obj";
@@ -21,6 +23,8 @@ library project Aglw is
       case Aglw_Config.Platform
       is
          when "win32"  =>  for Linker_Options use ("-lopengl32", "-lgdi32", "-lwin32ada", "-llargeint");  
+         when "linux"  =>  null;
+         when "macosx"  =>  null;
       end case;
    end Linker;
 
