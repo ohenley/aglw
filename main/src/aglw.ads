@@ -34,7 +34,6 @@ package Aglw is
                           width : Natural := 200;
                           height : Natural := 200);
    procedure ask_draw;
-   procedure leave_update;
    procedure close_window;
 
    -- Callback Setters
@@ -46,8 +45,8 @@ package Aglw is
    procedure set_visibility_callback (cb : Callback_Procedure);
 
    -- Window Setters
-   procedure set_window_position (pos_x : Natural := 0; pos_y : Natural := 0);
-   procedure set_window_size (width : Natural := 200; height : Natural := 200);
+   procedure set_window_position (x : Natural; y : Natural);
+   procedure set_window_size (width : Natural; height : Natural);
    procedure set_fullscreen;
    procedure set_cursor;
 

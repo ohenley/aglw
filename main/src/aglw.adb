@@ -6,6 +6,8 @@ with Ada.Real_Time;
 
 package body Aglw is
 
+   main_window : Window;
+
    protected hub is
       -- Syncronize OpenGL context creation in render
       procedure go_create_context;
@@ -13,12 +15,10 @@ package body Aglw is
 
       -- Syncronize closing of window and render
       procedure go_close;
-      function is_ok_close return Boolean;
+      function close return Boolean;
 
       procedure launch_gl;
-
       procedure ask_to_render;
-
       procedure update_render;
 
    private
@@ -28,34 +28,32 @@ package body Aglw is
       do_render : Boolean := False;
    end hub;
 
-   main_window : Window;
-
    protected body hub is
       procedure go_create_context is
       begin
          can_create_context := True;
-      end go_create_context;
+      end;
 
       entry create_context when can_create_context is
       begin
          null;
-      end create_context;
+      end;
 
       procedure go_close is
       begin
          can_close := True;
-      end go_close;
+      end;
 
-      function is_ok_close return Boolean is
+      function close return Boolean is
       begin
          return can_close;
-      end is_ok_close;
+      end;
 
       procedure launch_GL is
       begin
          render_update_cb := main_window.update_cb;
          main_window.start_cb.all;
-      end launch_gl;
+      end;
 
       procedure ask_to_render is
       begin
@@ -101,7 +99,7 @@ package body Aglw is
          begin
             while True
             loop
-               exit when hub.is_ok_close;
+               exit when hub.close;
                hub.ask_to_render;
             end loop;
          end;
@@ -114,7 +112,7 @@ package body Aglw is
             hub.launch_GL;
             while True
             loop
-               exit when hub.is_ok_close;
+               exit when hub.close;
                hub.update_render;
             end loop;
          end if;
@@ -142,9 +140,7 @@ package body Aglw is
       null;
    end;
 
-   -- Setters
-
-   -- callbacks
+   -- Callbacks Setters
    procedure set_start_callback (cb : Callback_Procedure) is
    begin
       main_window.start_cb := cb;
@@ -175,15 +171,13 @@ package body Aglw is
       main_window.visibility_cb := cb;
    end;
 
-   -- window
-   procedure set_window_position (pos_x : Natural := 0;
-                                  pos_y : Natural := 0) is
+   -- Window Setters
+   procedure set_window_position (x : Natural; y : Natural) is
    begin
       null;
    end;
 
-   procedure set_window_size (width : Natural := 200;
-                              height : Natural := 200) is
+   procedure set_window_size (width : Natural; height : Natural) is
    begin
       null;
    end;
