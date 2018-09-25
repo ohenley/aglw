@@ -125,11 +125,6 @@ package body Aglw is
       hub.ask_to_render;
    end;
 
-   procedure leave_update is
-   begin
-      null;
-   end;
-
    procedure close_window is
    begin
       null;
@@ -199,94 +194,3 @@ package body Aglw is
    end;
 
 end Aglw;
-
-
---     procedure init (window : in out Aglw.Window;
---                     window_x : Natural := 0;
---                     window_y : Natural := 0;
---                     window_width : Natural := 200;
---                     window_height : Natural := 200;
---                     window_title : String := "Title") is
---     begin
---        null;
---     end;
---
---
---     procedure start_window (window : in out Aglw.Window;
---                             start : access procedure;
---                             setup: access procedure;
---                             render : Callback_Procedure) is
---     begin
---        null;
---     end;
-
-
-
-
---     procedure open_window (window : in out Aglw.Window;
---                            window_x : Natural := 0;
---                            window_y : Natural := 0;
---                     window_width : Natural := 200;
---                     window_height : Natural := 200;
---                     window_title : String := "Title") is
---     begin
---        window.x := window_x;
---        window.y := window_y;
---        window.height := window_height;
---        window.width := window_width;
---        window.title := Ada.Strings.Unbounded.To_Unbounded_String(window_title);
---     end init;
-
---     function get_pseudo_frame_average return duration is
---     begin
---        delta_time := delta_time * 0.5 + Ada.Real_Time.To_Duration (Ada.Real_Time."-" (now, old_now)) * 0.5;
---        return delta_time;
---     end;
-
-
-
---  procedure start_window (window : in out Aglw.Window; start : access procedure; setup: access procedure; render : Callback_Procedure) is
---
---        --now : Ada.Real_Time.Time := Ada.Real_Time.Clock;
---        --old_now : Ada.Real_Time.Time := now;
---        --delta_time : Duration := 0.0;
---
---        task update;
---        task window_thread;
---
---        task body window_thread is
---        begin
---           Aglw.Windows.prepare_window (window);
---           flag.go_create_context;
---           Aglw.Windows.open_window (window);
---           flag.go_close;
---        end;
---
---        task body update is
---        begin
---           while True
---           loop
---              exit when flag.is_ok_close;
---              flag.ask_to_render;
---           end loop;
---        end;
---
---     begin
---
---        flag.create_context;
---        Aglw.Windows.create_context;
---        flag.launch_gl(start,setup, render);
---
---        while True
---        loop
---           exit when flag.is_ok_close;
---           flag.render;
---        end loop;
---
---     end start_window;
---
---     procedure redraw is
---     begin
---        flag.ask_to_render;
---     end;
-
