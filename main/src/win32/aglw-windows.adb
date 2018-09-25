@@ -22,6 +22,8 @@ package body Aglw.Windows is
    use Interfaces.C;
    use type System.Address;
 
+   WM_SIZING                  : constant := 16#214#;
+
    function CP (C_Str : Win32.CHAR_Array) return Win32.LPCSTR is
       function UC is new Ada.Unchecked_Conversion (System.Address, Win32.LPCSTR);
    begin
@@ -39,7 +41,6 @@ package body Aglw.Windows is
    CWUSEDEF      : constant := 16#80000000#;
    CW_USEDEF     : Win32.INT := MOD_to_INT (CWUSEDEF);
 
-   ps            : aliased Win32.Winuser.PAINTSTRUCT;
    hWndFrame     : Win32.Windef.HWND;
 
    hInst         : Win32.Windef.HINSTANCE;
@@ -56,19 +57,6 @@ package body Aglw.Windows is
       bResult := Win32.Wingdi.SwapBuffers(hDC);
    end swap;
 
-   protected body monitors is
-
-      function get_delay return Duration is
-      begin
-         return to_delay;
-      end get_delay;
-
-      procedure set_delay (new_delay : Duration) is
-      begin
-         to_delay := new_delay;
-      end;
-
-   end monitors;
 
    function Create_App_Window (window : in out Aglw.Window; hInst : Win32.Windef.HINSTANCE) return Win32.Windef.HWND
    is
@@ -82,8 +70,8 @@ package body Aglw.Windows is
         (lpClassName  => APPCLASS,
          lpWindowName => APPTITLE,
          dwStyle      => Win32.Winuser.WS_OVERLAPPEDWINDOW,
-         X            => Win32.Winuser.CW_USEDEFAULT,
-         Y            => Win32.Winuser.CW_USEDEFAULT,
+         X            => Win32.INT(window.x),
+         Y            => Win32.INT(window.y),
          nWidth       => Win32.INT(window.width),
          nHeight      => Win32.INT(window.height),
          hWndParent   => System.Null_Address,
@@ -91,19 +79,6 @@ package body Aglw.Windows is
          hInstance    => hInst,
          lpParam      => System.Null_Address);
    end Create_App_Window;
-
-   function Create_Proc (hWndFrame : Win32.Windef.HWND) return Win32.BOOL is
-   begin
-      return Win32.TRUE;
-   end Create_Proc;
-
-   procedure Paint_Proc (hWndFrame : Win32.Windef.HWND) is
-      hDC_p : Win32.Windef.HDC;
-   begin
-      hDC_p := Win32.Winuser.BeginPaint (hWndFrame, ps'Access);
-      delay (monitor.get_delay);
-      bResult := Win32.Winuser.EndPaint (hWndFrame, ps'Access);
-   end Paint_Proc;
 
    procedure Destroy_Proc (hWndFrame : Win32.Windef.HWND) is
    begin
@@ -129,10 +104,13 @@ package body Aglw.Windows is
    begin
       case wMsg is
          when Win32.Winuser.WM_CREATE =>
-            bResult := Create_Proc (hWndFrame);
+            null;
 
          when Win32.Winuser.WM_PAINT =>
-            Paint_Proc (hWndFrame);
+            ask_draw;
+
+         when WM_SIZING =>
+            ask_draw;
 
          when Win32.Winuser.WM_ERASEBKGND =>
             return Win32.LRESULT(Win32.True);
@@ -213,7 +191,6 @@ package body Aglw.Windows is
       -- Obtain a device context for the window
       hDC := Win32.Winuser.GetDC (hWndFrame);
 
-      -- Setup OpenGL
       declare
          pdf                        : aliased Win32.Wingdi.PIXELFORMATDESCRIPTOR;
          suggested_pdf              : aliased Win32.Wingdi.PIXELFORMATDESCRIPTOR;
@@ -264,6 +241,8 @@ package body Aglw.Windows is
 
       msg_p := new Win32.Winuser.MSG;
 
+      window_just_opened;
+
       while ret /= Win32.FALSE
       loop
          ret := Win32.Winuser.GetMessage (msg_p, System.Null_Address, 0, 0);
@@ -278,44 +257,5 @@ package body Aglw.Windows is
       end loop;
 
    end open_window;
-
-   --     procedure open_window (window : in out Aglw.Window) is
-   --        msg_p      : Win32.Winuser.LPMSG;
-   --        longResult : Win32.LONG_PTR;
-   --        use type System.Address;
-   --        use type Interfaces.C.int;
-   --        use type Win32.BOOL;
-   --     begin
-   --
-   --        bResult := Win32.Winuser.ShowWindow (hWndFrame, Win32.Winmain.Get_nCmdShow);
-   --
-   --        bResult := Win32.Winuser.UpdateWindow (hWndFrame);
-   --
-   --        msg_p := new Win32.Winuser.MSG;
-   --
-   --        while True
-   --        loop
-   --           declare
-   --              use Interfaces.C;
-   --              use Win32.Winuser;
-   --              use System;
-   --              message : Win32.UINT;
-   --              quit : Win32.UINT;
-   --           begin
-   --              while PeekMessage (msg_p, Null_Address, 0, 0, PM_REMOVE) /= Win32.FALSE
-   --              loop
-   --                 bResult := TranslateMessage (ac_MSG_t (msg_p));
-   --                 longResult := DispatchMessage (ac_MSG_t (msg_p));
-   --              end loop;
-   --
-   --              message := msg_p.message;
-   --              quit := Win32.UINT(WM_QUIT) or Win32.UINT(WM_CLOSE);
-   --
-   --              exit when message = quit;
-   --           end;
-   --        end loop;
-   --
-   --        Unregister_App_Class (window, hInst);
-   --     end open_window;
 
 end Aglw.Windows;
