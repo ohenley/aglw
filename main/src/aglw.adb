@@ -24,7 +24,7 @@ package body Aglw is
    private
       can_create_context : Boolean := False;
       can_close : Boolean := False;
-      render_update_cb : Callback_Procedure;
+      render_update_cb : Callback_Procedure := null;
       do_render : Boolean := False;
    end hub;
 
@@ -104,20 +104,28 @@ package body Aglw is
             end loop;
          end;
       begin
+
+         if main_window.start_cb = null then
+            Ada.Text_IO.Put_Line ("You did not set a Start procedure! eg. Aglw.set_start_callback (my_start_procedure'Access)");
+            return;
+         end if;
+
+         if main_window.update_cb = null then
+            Ada.Text_IO.Put_Line ("You did not set an Update procedure! eg. Aglw.set_start_callback (my_looping_procedure'Access)");
+            return;
+         end if;
+
          hub.create_context;
          Aglw.Windows.create_context;
 
-         if main_window.start_cb /= null and main_window.update_cb /= null then
+         hub.launch_GL;
+         while True
+         loop
+            exit when hub.close;
+            hub.update_render;
+         end loop;
 
-            hub.launch_GL;
-            while True
-            loop
-               exit when hub.close;
-               hub.update_render;
-            end loop;
-         end if;
       end;
-
    end;
 
    procedure ask_draw is
