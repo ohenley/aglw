@@ -2,74 +2,87 @@ with Ada.Unchecked_Conversion;
 with Ada.Strings.Unbounded;
 with Ada.Text_IO;
 with Aglw.Windows;
+pragma Elaborate (Aglw.Windows);
 with Ada.Real_Time;
 
 package body Aglw is
 
    main_window : Window;
 
-   protected hub is
-      -- Syncronize OpenGL context creation in render
+   protected guard is
+      -- guard OpenGL context creation execution order
       procedure go_create_context;
       entry create_context;
 
-      -- Syncronize closing of window and render
+      -- guard closing of tasks
       procedure go_close;
-      function close return Boolean;
+      function can_close return Boolean;
 
-      procedure launch_gl;
-      procedure ask_to_render;
-      procedure update_render;
+      -- order/guard call to render
+      procedure go_render;
+      function can_render return Boolean;
 
    private
-      can_create_context : Boolean := False;
-      can_close : Boolean := False;
-      render_update_cb : Callback_Procedure := null;
-      do_render : Boolean := False;
-   end hub;
+      may_create_context : Boolean := False;
+      may_close : Boolean := False;
+      may_render : Boolean := False;
+   end guard;
 
-   protected body hub is
+   protected body guard is
       procedure go_create_context is
       begin
-         can_create_context := True;
+         may_create_context := True;
       end;
 
-      entry create_context when can_create_context is
+      entry create_context when may_create_context is
       begin
          null;
       end;
 
       procedure go_close is
       begin
-         can_close := True;
+         may_close := True;
       end;
 
-      function close return Boolean is
+      function can_close return Boolean is
       begin
-         return can_close;
+         return may_close;
       end;
 
-      procedure launch_GL is
+      procedure go_render is
       begin
-         render_update_cb := main_window.update_cb;
+         may_render := true;
+      end;
+
+      function can_render return Boolean is
+      begin
+         return may_render;
+      end;
+   end;
+
+   task render_thread is
+      entry init;
+      entry render;
+   end;
+
+   task body render_thread is
+   begin
+      accept init do
+         guard.create_context;
+         Aglw.Windows.create_context;
          main_window.start_cb.all;
+         guard.go_render;
+         return;
       end;
-
-      procedure ask_to_render is
-      begin
-         do_render := True;
-      end;
-
-      procedure update_render is
-      begin
-         if do_render = true then
-            do_render := false;
-            render_update_cb.all;
+      loop
+         accept render do
+            main_window.update_cb(main_window.width, main_window.height);
             Aglw.Windows.swap;
-         end if;
-      end;
-
-   end hub;
+            return;
+         end;
+         exit when guard.can_close;
+      end loop;
+   end;
 
    procedure open_window (title : String := "Window name";
                           x : Natural := 0;
@@ -86,22 +99,12 @@ package body Aglw is
 
       declare
          task window_thread;
-         task update_thread;
 
          task body window_thread is
          begin
             Aglw.Windows.prepare_window (main_window);
             Aglw.Windows.open_window (main_window);
-            hub.go_close;
-         end;
-
-         task body update_thread is
-         begin
-            while True
-            loop
-               exit when hub.close;
-               hub.ask_to_render;
-            end loop;
+            guard.go_close;
          end;
       begin
 
@@ -115,14 +118,13 @@ package body Aglw is
             return;
          end if;
 
-         hub.create_context;
-         Aglw.Windows.create_context;
+         render_thread.init;
 
-         hub.launch_GL;
-         while True
+         while true
          loop
-            exit when hub.close;
-            hub.update_render;
+            exit when guard.can_close;
+            delay 0.016; -- 60 fps
+            render_thread.render;
          end loop;
 
       end;
@@ -130,7 +132,9 @@ package body Aglw is
 
    procedure ask_draw is
    begin
-      hub.ask_to_render;
+      if guard.can_render then
+         render_thread.render;
+      end if;
    end;
 
    procedure close_window is
@@ -149,7 +153,7 @@ package body Aglw is
       main_window.start_cb := cb;
    end;
 
-   procedure set_update_callback (cb : Callback_Procedure) is
+   procedure set_update_callback (cb : Update_Callback_Procedure) is
    begin
       main_window.update_cb := cb;
    end;
@@ -198,7 +202,8 @@ package body Aglw is
 
    procedure window_just_opened is
    begin
-      hub.go_create_context;
+      Ada.Text_IO.Put_Line ("window_just_opened");
+      guard.go_create_context;
    end;
 
 end Aglw;

@@ -5,6 +5,7 @@ package Aglw is
 
    -- Types
    type Callback_Procedure is access procedure;
+   type Update_Callback_Procedure is access procedure(width : Natural; height : Natural);
 
    type Window is tagged
       record
@@ -19,7 +20,7 @@ package Aglw is
          start_cb : Callback_Procedure := null;
          setup_cb : Callback_Procedure := null;
          stop_cb : Callback_Procedure := null;
-         update_cb : Callback_Procedure := null;
+         update_cb : Update_Callback_Procedure := null;
          error_cb : Callback_Procedure := null;
          resize_cb : Callback_Procedure := null;
          motion_cb : Callback_Procedure := null;
@@ -38,7 +39,7 @@ package Aglw is
 
    -- Callback Setters
    procedure set_start_callback (cb : Callback_Procedure);
-   procedure set_update_callback (cb : Callback_Procedure);
+   procedure set_update_callback (cb : Update_Callback_Procedure);
    procedure set_error_callback (cb : Callback_Procedure);
    procedure set_resize_callback (cb : Callback_Procedure);
    procedure set_motion_callback (cb : Callback_Procedure);
